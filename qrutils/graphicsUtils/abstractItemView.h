@@ -20,9 +20,12 @@ public slots:
 
 signals:
 	void deleteItem();
+	void zoomChanged();
+	void contentsRectChanged();
 
 protected:
-	virtual void keyPressEvent(QKeyEvent *event);
-	virtual void wheelEvent(QWheelEvent *event);
+	void keyPressEvent(QKeyEvent *event) override;
+	void wheelEvent(QWheelEvent *event) override;
+	void scrollContentsBy(int dx, int dy) override;
 };
 }

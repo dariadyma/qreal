@@ -45,6 +45,7 @@ HEADERS += \
 	$$PWD/src/engine/view/rotater.h \
 	$$PWD/src/engine/view/sonarSensorItem.h \
 	$$PWD/src/engine/view/gridParameters.h \
+	$$PWD/src/engine/view/ruler.h \
 	$$PWD/src/engine/model/model.h \
 	$$PWD/src/engine/model/constants.h \
 	$$PWD/src/engine/model/settings.h \
@@ -71,6 +72,7 @@ SOURCES += \
 	$$PWD/src/engine/view/sensorItem.cpp \
 	$$PWD/src/engine/view/rotater.cpp \
 	$$PWD/src/engine/view/sonarSensorItem.cpp \
+	$$PWD/src/engine/view/ruler.cpp \
 	$$PWD/src/engine/view/gridParameters.cpp \
 	$$PWD/src/engine/view/twoDModelDisplayWidget.cpp \
 	$$PWD/src/engine/model/model.cpp \

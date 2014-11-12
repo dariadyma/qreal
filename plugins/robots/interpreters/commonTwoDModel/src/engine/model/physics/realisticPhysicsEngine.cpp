@@ -68,53 +68,51 @@ void RealisticPhysicsEngine::countTractionForceAndItsMoment(qreal speed1, qreal 
 	QPointF const engine1Point = QPointF(x + dx + dy, y + dy - dx);
 	QPointF const engine2Point = QPointF(x + dx - dy, y + dy + dx);
 
-	QVector2D const traction1Force = direction * speed1;
-	QVector2D const traction2Force = direction * speed2;
-	QVector2D const friction1Force = -direction * speed1 * floorFrictionCoefficient;
-	QVector2D const friction2Force = -direction * speed2 * floorFrictionCoefficient;
-
 	QVector2D const radiusVector1 = QVector2D(engine1Point - rotationCenter);
 	QVector2D const radiusVector2 = QVector2D(engine2Point - rotationCenter);
+
+	QVector2D const traction1Force = direction * speed1;
+	QVector2D const traction2Force = direction * speed2;
+
 	QVector2D const realTractionForce1 = Geometry::projection(traction1Force, radiusVector1);
 	QVector2D const realTractionForce2 = Geometry::projection(traction2Force, radiusVector2);
 
 	// Parallelogram rule
 	mTractionForce = realTractionForce1 + realTractionForce2;
-	mTractionForce -= floorFrictionCoefficient * mVelocity;
+
+	qreal const someFrictionCoefficient = 0.2;
+	QVector2D someFrictionForce = - someFrictionCoefficient * mVelocity;
 
 	qreal const tractionForceMoment1 = Geometry::vectorProduct(traction1Force, radiusVector1);
 	qreal const tractionForceMoment2 = Geometry::vectorProduct(traction2Force, radiusVector2);
-	qreal const frictionForceMoment1 = Geometry::vectorProduct(friction1Force, radiusVector1);
-	qreal const frictionForceMoment2 = Geometry::vectorProduct(friction2Force, radiusVector2);
-	mForceMoment = -tractionForceMoment1 - tractionForceMoment2 - frictionForceMoment1 - frictionForceMoment2;
 
-	mTractionForce += mReactionForce + mWallsFrictionForce;
+	mTractionForce += mReactionForce + mWallsFrictionForce + someFrictionForce;
+
+	mForceMoment = (tractionForceMoment1 + tractionForceMoment2)* (1 - someFrictionCoefficient);
 	mForceMoment -= mForceMomentDecrement;
 }
 
 void RealisticPhysicsEngine::recalculateVelocity(qreal timeInterval)
 {
-	qreal const realAngularVelocityFrictionFactor = fabs(mAngularVelocity * angularVelocityFrictionFactor);
-
 	mVelocity += mTractionForce / robotMass * timeInterval;
+
+	qreal const realAngularVelocityFrictionFactor = mAngularVelocity * angularVelocityFrictionFactor;
 	mAngularVelocity += mForceMoment / robotInertialMoment * timeInterval;
-	qreal const angularFriction = realAngularVelocityFrictionFactor / robotInertialMoment * timeInterval;
 	qreal const oldAngularVelocity = mAngularVelocity;
-
-	mAngularVelocity -= angularFriction * Math::sign(mAngularVelocity);
-
+	mAngularVelocity -= realAngularVelocityFrictionFactor / robotInertialMoment * timeInterval;
 	if (oldAngularVelocity * mAngularVelocity <= 0) {
 		mAngularVelocity = 0;
 	}
 }
 
+//The friction force appears when the robot rotates, because he is not in the liquid
 void RealisticPhysicsEngine::applyRotationalFrictionForce(qreal timeInterval, QVector2D const &direction)
 {
 	QVector2D rotationalFrictionForce(-direction.y(), direction.x());
 	rotationalFrictionForce.normalize();
 
 	qreal const sinus = Geometry::vectorProduct(mVelocity.normalized(), rotationalFrictionForce);
-	rotationalFrictionForce *= sinus * mVelocity.length() * rotationalFrictionFactor;
+	rotationalFrictionForce *= sinus * mVelocity.length() * rotationalFrictionFactor * robotMass;
 
 	if (Geometry::scalarProduct(rotationalFrictionForce, mVelocity) > 0) {
 		rotationalFrictionForce = -rotationalFrictionForce;

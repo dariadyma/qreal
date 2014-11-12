@@ -56,12 +56,13 @@ int TwoDModelEngineApi::readTouchSensor(PortInfo const &port) const
 
 	QPainterPath sensorPath;
 	qreal const touchRegionRadius = size.height() / 2;
-	qreal const stickCenter = size.width() / 2 - touchRegionRadius;
+	qreal const stickCenter = size.width() / 2;
 	// (0,0) in sensor coordinates is sensor`s center
 	QPointF const ellipseCenter = QPointF(stickCenter * cos(rotation), stickCenter * sin(rotation));
 	sensorPath.addEllipse(position + ellipseCenter, touchRegionRadius, touchRegionRadius);
 
 	bool const pressed = mModel.worldModel().checkCollision(sensorPath);
+
 	return pressed ? touchSensorPressedSignal : touchSensorNotPressedSignal;
 }
 

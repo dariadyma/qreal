@@ -97,6 +97,9 @@ D2ModelWidget::D2ModelWidget(Model &model, QWidget *parent)
 	setFocus();
 
 	mUi->timelineBox->setSingleStep(Timeline::timeInterval * 0.001);
+
+	mUi->horizontalRuler->setScene(mUi->graphicsView);
+	mUi->verticalRuler->setScene(mUi->graphicsView);
 }
 
 D2ModelWidget::~D2ModelWidget()
@@ -144,6 +147,14 @@ void D2ModelWidget::initWidget()
 
 	connect(mUi->gridParametersBox, SIGNAL(parametersChanged()), mScene, SLOT(update()));
 	connect(mUi->gridParametersBox, &GridParameters::parametersChanged, mScene, &D2ModelScene::alignWalls);
+	connect(mUi->gridParametersBox, SIGNAL(parametersChanged()), mUi->horizontalRuler, SLOT(update()));
+	connect(mUi->gridParametersBox, SIGNAL(parametersChanged()), mUi->verticalRuler, SLOT(update()));
+	connect(mScene, SIGNAL(sceneRectChanged(QRectF)), mUi->horizontalRuler, SLOT(update()));
+	connect(mScene, SIGNAL(sceneRectChanged(QRectF)), mUi->verticalRuler, SLOT(update()));
+	connect(mScene->mainView(), SIGNAL(zoomChanged()), mUi->horizontalRuler, SLOT(update()));
+	connect(mScene->mainView(), SIGNAL(zoomChanged()), mUi->verticalRuler, SLOT(update()));
+	connect(mScene->mainView(), SIGNAL(contentsRectChanged()), mUi->horizontalRuler, SLOT(update()));
+	connect(mScene->mainView(), SIGNAL(contentsRectChanged()), mUi->verticalRuler, SLOT(update()));
 }
 
 void D2ModelWidget::connectUiButtons()
